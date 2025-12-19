@@ -1,0 +1,11 @@
+notebook
+ipykernel
+autograd
+scikit-learn
+matplotlib
+numpy
+pandas
+xarray
+keras
+tensorflow
+torch
