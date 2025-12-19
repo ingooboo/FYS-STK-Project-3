@@ -4,29 +4,6 @@ from matplotlib.ticker import FuncFormatter
 from matplotlib.lines import Line2D
 from .fig_saver import save_fig
 
-'''def plot_imshow(x, t, solution, cmap, title, diff):
-    if diff:
-        v = np.max(np.abs(solution))
-        v = v if v > 0 else 1e-12
-        plt.imshow(solution,
-                origin='lower',
-                extent=[x.min(), x.max(), t.min(), t.max()],
-                aspect='auto',
-                cmap=cmap,
-                vmin=-v,
-                vmax=v)
-    else:
-        plt.imshow(solution,
-               origin='lower',
-               extent=[x.min(), x.max(), t.min(), t.max()],
-               aspect='auto',
-               cmap=cmap)
-    plt.xlabel('t')
-    plt.ylabel('x')
-    plt.title(title)
-    plt.colorbar()
-    plt.show()'''
-
 def _sci_fmt(x, pos):
     """Format numbers as compact scientific notation like 1e-3 or 3e-4."""
     if x == 0:
