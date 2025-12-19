@@ -40,7 +40,6 @@ FYS-STK-Project-3/
 .
 ├── main/ # Main jupyter notebooks for implementations and figures
 ├── src/ # Source code and helper modules
-├── Project3-Outline.ipynb # Project ouline
 ├── FYSSTK_P3.pdf # Project report (PDF)
 ├── environment.yml # Conda environment specification
 ├── requirements.txt # Python dependencies
