@@ -1,3 +1,5 @@
+"""Plotting helpers for solutions and diagnostics."""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
@@ -5,7 +7,15 @@ from matplotlib.lines import Line2D
 from .fig_saver import save_fig
 
 def _sci_fmt(x, pos):
-    """Format numbers as compact scientific notation like 1e-3 or 3e-4."""
+    """Format numbers as compact scientific notation like 1e-3 or 3e-4.
+
+    Args:
+        x: Numeric tick value.
+        pos: Tick position (unused).
+
+    Returns:
+        Formatted string for the tick label.
+    """
     if x == 0:
         return "0"
     # Use lower-case 'e' style, and remove leading + in exponent
@@ -16,11 +26,16 @@ def _sci_fmt(x, pos):
     return s
 
 def plot_imshow(x, t, solution, cmap, title, diff, save_name=None):
-    """
-    x, t: 1D arrays used for extent: [x.min(), x.max(), t.min(), t.max()]
-    solution: 2D array with shape (len(t), len(x)) or (ny, nx)
-    diff: if True, use symmetric vmin/vmax and custom colorbar ticks/formatting
-    save_name: optional filename (without path) to save using the shared helper
+    """Plot a 2D field using imshow.
+
+    Args:
+        x: 1D array used for spatial extent.
+        t: 1D array used for time extent.
+        solution: 2D array of values.
+        cmap: Matplotlib colormap name.
+        title: Plot title.
+        diff: If True, use symmetric vmin/vmax and scientific ticks.
+        save_name: Optional filename to save via shared helper.
     """
     # create image
     if diff:
@@ -69,6 +84,15 @@ def plot_imshow(x, t, solution, cmap, title, diff, save_name=None):
 
 
 def plot_lines(PINN_sol, FTCS_sol, Analytic_sol, save_name=None):
+    """Plot solution slices at selected x positions over time.
+
+    Args:
+        PINN_sol: PINN solution grid (x by t).
+        FTCS_sol: FTCS solution grid (x by t).
+        Analytic_sol: Analytical solution grid (x by t).
+        save_name: Optional filename to save via shared helper.
+    """
+    # Uses global x and t arrays from the calling scope.
     x_positions = [0.5, 0.625, 0.75, 0.875, 0.1]          # list of x positions for right plot
     x_idx = [np.argmin(np.abs(x - xi)) for xi in x_positions]
     # linestyles for the three solutions

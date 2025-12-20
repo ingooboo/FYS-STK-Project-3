@@ -1,3 +1,6 @@
+"""Package exports for the PINN project."""
+
+# Re-export public helpers for convenience in notebooks.
 from .activation_funcs import * 
 from .analytical_func import *
 from .architecture import *

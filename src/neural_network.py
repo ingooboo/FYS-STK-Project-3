@@ -1,8 +1,4 @@
-##########################################################################################################
-# NEURAL NETWORK IMPLEMENTATION :
-##########################################################################################################
-# Project 3 - FYS-STK4155 :
-# Authors : Ingvild Olden and Jenny Guldvog 
+"""Autograd-based feedforward network utilities."""
 
 ##########################################################################################################
 # IMPORT NECESSARY PACKAGES :
@@ -16,27 +12,17 @@ def deep_neural_network(deep_params,
                         input_data, 
                         activation_func,
                         debug=False):
-    '''
-    A feedforward deep neural network with multiple hidden layers.
+    """Run a feedforward pass through the network.
 
-    Parameters:
-    -----------
-    deep_params : list of np.arrays
-        List containing the weights and biases for each layer. 
-        Each element in the list is a 2D array where each row corresponds to the weights and bias for one neuron in that layer.
-    input_data : np.array
-        Input data of shape (num_coordinates, ) for a single point or (num_coordinates, num_points) for multiple points.
-    activation_func : function
-        Activation function to be applied at each hidden layer. For the output layer, no activation function is applied.
-    debug : bool
-        If True, print debug information.
+    Args:
+        deep_params: List of weight matrices including bias rows.
+        input_data: Array of shape (num_coordinates,) or (num_coordinates, num_points).
+        activation_func: Activation function applied to hidden layers.
+        debug: If True, print debug information.
 
     Returns:
-    --------    
-    z_output : np.array
-        Output of the neural network after feedforwarding the input through all layers.
-
-    '''
+        Network output array.
+    """
     # Reshape input x to be of shape (num_coordinates, num_points)
     # Because x can be given as a single point (num_coordinates, ) or multiple points (num_coordinates, num_points)
     num_coordinates = np.size(input_data,0)
@@ -84,25 +70,18 @@ def deep_neural_network(deep_params,
     return z_output.squeeze()
 
 class DeepNeuralNetwork:
-    """
-    A feedforward deep neural network with multiple hidden layers.
+    """Feedforward network with multiple hidden layers.
 
-    Parameters
-    ----------
-    deep_params : list of np.ndarray
-        List containing the weights (including bias row) for each layer.
-        Each element is a 2D array where each row corresponds to the weights
-        and bias for one neuron in that layer. The last element is the output
-        layer's weight matrix.
-    activation_func : callable
-        Activation function to apply at each hidden layer. The output layer
-        is linear (no activation).
+    Args:
+        deep_params: List of weight matrices including bias rows.
+        activation_func: Activation function for hidden layers.
     """
 
     def __init__(self, deep_params, activation_func):
         # Expect deep_params to be a list of 2D arrays
         self.deep_params = deep_params
         self.activation  = activation_func
+        # Map string activations to concrete callables.
         if self.activation == 'tanh':
             self.activation = np.tanh
         elif self.activation == 'sigmoid':
@@ -111,30 +90,30 @@ class DeepNeuralNetwork:
             self.activation = lambda z: np.maximum(0, z)
  
     def set_params(self, deep_params):
-        """Replace the network parameters."""
+        """Replace the network parameters.
+
+        Args:
+            deep_params: New list of weight matrices.
+        """
         self.deep_params = deep_params
 
     def get_params(self):
-        """Return the network parameters."""
+        """Return the network parameters.
+
+        Returns:
+            List of weight matrices.
+        """
         return self.deep_params
 
     def forward(self, input_data, debug=False):
-        """
-        Perform a feedforward pass.
+        """Perform a feedforward pass.
 
-        Parameters
-        ----------
-        input_data : np.ndarray
-            Input data of shape (num_coordinates,) for a single point or
-            (num_coordinates, num_points) for multiple points.
-        debug : bool
-            If True, print intermediate shapes and info.
+        Args:
+            input_data: Array of shape (num_coordinates,) or (num_coordinates, num_points).
+            debug: If True, print intermediate shapes and info.
 
-        Returns
-        -------
-        z_output : np.ndarray
-            Output of the neural network after feedforwarding the input through
-            all layers. squeezed to remove singleton dimensions.
+        Returns:
+            Output array with singleton dimensions removed.
         """
         # Ensure shape (num_coordinates, num_points)
         num_coordinates = np.size(input_data, 0)
@@ -172,4 +151,5 @@ class DeepNeuralNetwork:
     
     # Optional convenience alias
     def __call__(self, input_data, debug=False):
+        """Alias for forward()."""
         return self.forward(input_data, debug=debug)

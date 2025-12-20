@@ -1,3 +1,4 @@
+"""Plot styling configuration for LaTeX-like figures."""
 
 ##################################################################################
 # Import necessary libraries :

@@ -1,8 +1,4 @@
-##########################################################################################################
-# NEURAL NETWORK IMPLEMENTATION :
-##########################################################################################################
-# Project 3 - FYS-STK4155 :
-# Authors : Ingvild Olden and Jenny Guldvog 
+"""Training utilities for the PyTorch-based PINN."""
 
 ##########################################################################################################
 # IMPORT NECESSARY PACKAGES :
@@ -34,6 +30,28 @@ def train_PINN_pyTorch(x,
                        debug=False,
                        stop_patience=None,
                        stop_delta=0.0):
+    """Train the PyTorch PINN with GD/Adam/SGD-Adam.
+
+    Args:
+        x: Spatial grid tensor.
+        t: Time grid tensor.
+        num_neurons: Hidden layer widths.
+        epochs: Number of training epochs.
+        learning_rate: Optimizer learning rate.
+        activation_function: Activation function name.
+        seed: RNG seed.
+        optimization_method: 'GD', 'GD-adam', or 'SGD-adam'.
+        batch_size: Mini-batch size for SGD-Adam.
+        shuffle: If True, shuffle batches each epoch.
+        replacement: If True, sample batches with replacement.
+        verbose: If True, print training progress.
+        debug: If True, print debug information from model/cost.
+        stop_patience: Early-stopping patience in epochs.
+        stop_delta: Early-stopping improvement threshold.
+
+    Returns:
+        Tuple of (state_dict, history).
+    """
     # Set random seed for reproducibility
     torch.manual_seed(seed)
     # Make the model

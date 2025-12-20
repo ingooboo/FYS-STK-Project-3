@@ -1,3 +1,5 @@
+"""Helpers for training, evaluating, and plotting PINN architectures."""
+
 from __future__ import annotations
 
 import autograd.numpy as np
@@ -19,10 +21,21 @@ _saved_analytical_once = False
 
 
 def set_context(*, x, t, x_torch, t_torch, Nx, Nt, epochs, learning_rate, seed, batch_size, stop_delta=0.0, stop_patience=None):
-    """
-    Store common tensors/params so helpers can be used without notebook globals.
+    """Store shared tensors/params so helpers can avoid notebook globals.
 
-    Call this once in the notebook after you have created x, t, x_torch, t_torch, etc.
+    Args:
+        x: 1D numpy array of spatial coordinates.
+        t: 1D numpy array of time coordinates.
+        x_torch: 1D torch tensor of spatial coordinates.
+        t_torch: 1D torch tensor of time coordinates.
+        Nx: Number of spatial points.
+        Nt: Number of time points.
+        epochs: Training epochs.
+        learning_rate: Optimizer learning rate.
+        seed: RNG seed.
+        batch_size: Mini-batch size for SGD.
+        stop_delta: Early-stop improvement threshold.
+        stop_patience: Early-stop patience in epochs.
     """
     _ctx.update(
         dict(
@@ -42,17 +55,44 @@ def set_context(*, x, t, x_torch, t_torch, Nx, Nt, epochs, learning_rate, seed, 
     )
 
 
+# Guard for required context keys.
 def _require_ctx(keys):
+    """Raise if required context keys are missing.
+
+    Args:
+        keys: Iterable of required context keys.
+
+    Raises:
+        NameError: If any required keys are missing.
+    """
     missing = [k for k in keys if k not in _ctx]
     if missing:
         raise NameError(
             f"Missing context {missing}. Call set_context(...) first or pass the needed arguments explicitly."
         )
 
+# Normalize labels for plot titles and filenames.
 def _format_label(item):
+    """Format list/tuple labels consistently for plots and filenames.
+
+    Args:
+        item: Value or iterable to format.
+
+    Returns:
+        String label for use in titles/filenames.
+    """
     return '-'.join(map(str, item)) if isinstance(item, (list, tuple)) else str(item)
 
+# Compact label when all hidden layers share the same width.
 def _architecture_title_label(num_hidden_neurons):
+    """Return a compact architecture label for plot titles.
+
+    Args:
+        num_hidden_neurons: Layer widths or width list.
+
+    Returns:
+        Short label describing the architecture.
+    """
     if isinstance(num_hidden_neurons, (list, tuple)) and len(num_hidden_neurons) > 0:
         unique_widths = set(num_hidden_neurons)
         if len(unique_widths) == 1:
@@ -70,15 +110,30 @@ def plot_an_nn_diff(
     save_prefix=None,
     save_analytical_once=True,
 ):
+    """Plot PINN solution, analytical solution, and their difference.
+
+    Args:
+        g_dnn_ag: PINN solution grid.
+        G_analytical: Analytical solution grid.
+        diff_ag: Difference grid (PINN - analytical).
+        activation_func: Activation function name/label.
+        num_hidden_neurons: Architecture specification.
+        x: Spatial grid (optional; from context if None).
+        t: Time grid (optional; from context if None).
+        save_prefix: Optional filename prefix.
+        save_analytical_once: If True, save analytical plot only once.
+    """
     activation_label = _format_label(activation_func)
     architecture_label = _format_label(num_hidden_neurons)
     title_architecture_label = _architecture_title_label(num_hidden_neurons)
     prefix = save_prefix or f"{activation_label}_{architecture_label}"
+    # Pull plotting axes from shared context if not passed explicitly.
     if x is None or t is None:
         _require_ctx(["x", "t"])
         x = _ctx["x"]
         t = _ctx["t"]
 
+    # Plot PINN solution.
     plt.figure(figsize=(6,5))
     plt.imshow(g_dnn_ag,
            origin='lower',
@@ -92,6 +147,7 @@ def plot_an_nn_diff(
     save_fig(f'pinn_solution_{prefix}')
     plt.show()
 
+    # Plot analytical solution (optionally saved once).
     plt.figure(figsize=(5,5))
     plt.imshow(G_analytical,
            origin='lower',
@@ -112,6 +168,7 @@ def plot_an_nn_diff(
     plt.show()
 
 
+    # Plot difference with symmetric log scaling for visibility.
     plt.figure(figsize=(5,5))
     v = float(np.max(np.abs(diff_ag)))
     v = v if v > 0 else 1e-12
@@ -141,6 +198,20 @@ def comp_max_abs_diff(
     num_hidden_neurons=None,
     activation_func=None,
 ):
+    """Compute max error and final cost for a trained model.
+
+    Args:
+        Nx: Number of spatial points.
+        Nt: Number of time points.
+        x_torch: Spatial grid (torch).
+        t_torch: Time grid (torch).
+        P: Model state dict.
+        num_hidden_neurons: Architecture specification.
+        activation_func: Activation function name/label.
+
+    Returns:
+        Tuple of (max_abs_diff, final_cost, g_dnn_ag, G_analytical, diff_ag).
+    """
     if P is None or num_hidden_neurons is None or activation_func is None:
         raise ValueError("Provide P, num_hidden_neurons and activation_func.")
     # Use context defaults if not provided
@@ -157,6 +228,7 @@ def comp_max_abs_diff(
     model = Net(network=num_hidden_neurons, activation=activation_func).to(device)
     model.load_state_dict(P)
     model.eval()
+    # Fill solution grids with the trained model and analytical reference.
     with torch.no_grad():
         for i, x_ in enumerate(x_torch):
             for j, t_ in enumerate(t_torch):
@@ -174,6 +246,14 @@ def comp_max_abs_diff(
 
 
 def plot_cost_history(history, activation_function, num_hidden_neurons, save_name=None):
+    """Plot training cost history.
+
+    Args:
+        history: Dict with 'epoch' and 'cost' lists.
+        activation_function: Activation function name/label.
+        num_hidden_neurons: Architecture specification.
+        save_name: Optional filename for saving the plot.
+    """
     # Plot cost history
     iters = history['epoch']
     costs = history['cost']
@@ -192,6 +272,15 @@ def plot_cost_history(history, activation_function, num_hidden_neurons, save_nam
 
 # Heatmap helpers for architecture sweeps
 def build_architecture(width, depth):
+    """Return a list of hidden layer widths for a given depth.
+
+    Args:
+        width: Number of neurons per hidden layer.
+        depth: Number of hidden layers.
+
+    Returns:
+        List of hidden layer widths.
+    """
     return [width] * depth
 
 
@@ -211,6 +300,26 @@ def evaluate_architecture(
     stop_delta=None,
     stop_patience=None,
 ):
+    """Train/evaluate a single architecture and return metrics.
+
+    Args:
+        width: Number of neurons per hidden layer.
+        depth: Number of hidden layers.
+        activation_function: Activation function name/label.
+        x_torch: Spatial grid (torch).
+        t_torch: Time grid (torch).
+        Nx: Number of spatial points.
+        Nt: Number of time points.
+        epochs: Training epochs.
+        learning_rate: Optimizer learning rate.
+        seed: RNG seed.
+        batch_size: Mini-batch size.
+        stop_delta: Early-stop improvement threshold.
+        stop_patience: Early-stop patience.
+
+    Returns:
+        Tuple of (final_cost, max_abs_diff).
+    """
     # Pull from context if not provided explicitly
     if any(v is None for v in (x_torch, t_torch, Nx, Nt, epochs, learning_rate, seed, batch_size, stop_delta, stop_patience)):
         _require_ctx(["x_torch", "t_torch", "Nx", "Nt", "epochs", "learning_rate", "seed", "batch_size", "stop_delta", "stop_patience"])
@@ -243,12 +352,25 @@ def evaluate_architecture(
         stop_patience=stop_patience,
         stop_delta=stop_delta,
     )
+    # Compute error metrics for this architecture.
     max_abs_diff, final_cost, g_dnn_ag, G_analytical, diff_ag = comp_max_abs_diff(
         Nx, Nt, x_torch, t_torch, P, num_hidden_neurons, activation_function
     )
     return final_cost, max_abs_diff
 
 def plot_metric_heatmap(metric_grid, widths, depths, title, cbar_label, cmap='YlOrRd', log_scale=False, save_name=None):
+    """Plot a heatmap of metrics across widths/depths.
+
+    Args:
+        metric_grid: 2D array of metric values.
+        widths: Iterable of widths.
+        depths: Iterable of depths.
+        title: Plot title.
+        cbar_label: Colorbar label.
+        cmap: Colormap name.
+        log_scale: If True, plot log10 of values.
+        save_name: Optional filename for saving the plot.
+    """
     data = np.array(metric_grid, dtype=float)
     eps = 1e-12
     data_plot = np.log10(np.clip(data, eps, None)) if log_scale else data

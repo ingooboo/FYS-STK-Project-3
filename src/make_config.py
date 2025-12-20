@@ -1,7 +1,26 @@
+"""Configuration helpers for grid and training settings."""
+
 import autograd.numpy as np
 import torch
 
 def make_config(Nx,Nt, num_hidden_neurons, opt_met, epochs, learning_rate, batch_fraction, batch_size, seed, verbose):
+    """Build a configuration dictionary and optionally print it.
+
+    Args:
+        Nx: Number of spatial points.
+        Nt: Number of time points.
+        num_hidden_neurons: Hidden layer widths.
+        opt_met: Optimization method name.
+        epochs: Training epochs.
+        learning_rate: Optimizer learning rate.
+        batch_fraction: Fraction of grid for batch sizing.
+        batch_size: Mini-batch size.
+        seed: RNG seed.
+        verbose: If True, print formatted configuration.
+
+    Returns:
+        Configuration dictionary with formatted entries.
+    """
     ##################################################################################
     # CONFIGURATION INFORMATION : 
     ##################################################################################
@@ -22,6 +41,16 @@ def make_config(Nx,Nt, num_hidden_neurons, opt_met, epochs, learning_rate, batch
     return configuration_information
 
 def create_t_and_x_batch_size(Nx,Nt,batch_fraction=0.1):
+    """Create spatial/time grids and batch size for SGD.
+
+    Args:
+        Nx: Number of spatial points.
+        Nt: Number of time points.
+        batch_fraction: Fraction of grid for batch size.
+
+    Returns:
+        Tuple of (t, x, t_torch, x_torch, batch_size).
+    """
     ##################################################################################
     # RANGE FOR x (lenght of rod, always 0-1) AND t (time, def 0-1) : 
     ##################################################################################
@@ -45,6 +74,22 @@ def set_up_test_grid_res(Nx,
                          batch_fraction=0.1,
                          seed=None,
                          verbose=False):
+    """Create grids, batch size, and configuration for a test run.
+
+    Args:
+        Nx: Number of spatial points.
+        Nt: Number of time points.
+        opt_met: Optimization method name.
+        num_hidden_neurons: Hidden layer widths.
+        epochs: Training epochs.
+        learning_rate: Optimizer learning rate.
+        batch_fraction: Fraction of grid for batch size.
+        seed: RNG seed.
+        verbose: If True, print configuration.
+
+    Returns:
+        Tuple of (t, x, t_torch, x_torch, batch_size, config).
+    """
     ##################################################################################
     # MAKE X AND T : 
     ##################################################################################

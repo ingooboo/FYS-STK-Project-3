@@ -1,8 +1,4 @@
-##########################################################################################################
-# NEURAL NETWORK IMPLEMENTATION :
-##########################################################################################################
-# Project 3 - FYS-STK4155 :
-# Authors : Ingvild Olden and Jenny Guldvog 
+"""PyTorch feedforward network used by the PINN."""
 
 ##########################################################################################################
 # IMPORT NECESSARY PACKAGES :
@@ -24,34 +20,25 @@ class Net(nn.Module):
         network: Optional[Union[int, Iterable[int]]] = None,
         activation: Union[str, Iterable[str]] = "tanh",
     ):
-        """
-        A feedforward deep neural network with multiple hidden layers using PyTorch.
+        """Initialize a feedforward network with configurable widths and activations.
 
-        Parameters
-        ----------
-        network : int or iterable of int, optional
-            If an int is provided, legacy behavior is used: `layers` hidden layers each
-            with `hidden` neurons. If an iterable (e.g. [3,5,10]) is provided, it defines
-            the number of neurons in each hidden layer explicitly.
-            If None (default), legacy behavior: `hidden=64` and `layers=3`.
-        activation : str or iterable of str, optional
-            Activation function(s) to be used in the hidden layers. If a single string
-            is provided, it is applied to all hidden layers. If an iterable is provided,
-            it must have the same length as the number of hidden layers, and each entry
-            specifies the activation for that layer. Options are "tanh", "relu",
-            and "sigmoid". Default is "tanh".
-        Returns
-        -------
-        None
+        Args:
+            network: Hidden-layer widths or single width for legacy behavior.
+            activation: Activation name(s) for hidden layers.
+
+        Raises:
+            ValueError: If activation list length does not match hidden layers.
         """
         # This part handles the legacy behavior and input validation, then builds the network
         super().__init__()
+        # Normalize network width spec to a list.
         if network is None:
             hidden_sizes = [64] * 3
         elif isinstance(network, int):
             hidden_sizes = [network] * 3
         else:
             hidden_sizes = list(network)
+        # Normalize activations to a list aligned with hidden sizes.
         if isinstance(activation, str):
             activations = [activation] * len(hidden_sizes)
         else:
@@ -62,6 +49,7 @@ class Net(nn.Module):
                 )
 
         def activation_layer(name: str):
+            # Map activation names to PyTorch modules.
             if name == "tanh":
                 return nn.Tanh()
             if name == "relu":
@@ -72,36 +60,25 @@ class Net(nn.Module):
 
         dims = [2] + hidden_sizes + [1]
         modules = []
+        # Build hidden layers with activations.
         for i in range(len(dims) - 2):
             modules.append(nn.Linear(dims[i], dims[i + 1]))
             modules.append(activation_layer(activations[i]))
+        # Output layer (linear).
         modules.append(nn.Linear(dims[-2], dims[-1]))
         self.net = nn.Sequential(*modules)
     def forward(self, t, x, debug=False):
-        '''  
-        Forward pass through the network.
+        """Run a forward pass.
 
-        Parameters:
-        -----------
-        t : torch.Tensor
-            Time input tensor.
-        x : torch.Tensor
-            Spatial input tensor.
-        debug : bool
-            If True, print debug information.
+        Args:
+            t: Time input tensor.
+            x: Spatial input tensor.
+            debug: If True, print debug information.
 
         Returns:
-        --------
-        torch.Tensor
-            Output of the network.
-
-        Example usage:
-
-        model = Net(network=[10, 20, 10], activation="relu")
-        t = torch.tensor([0.0, 0.5, 1.0])
-        x = torch.tensor([0.0, 0.5, 1.0])
-        output = model(t, x)    
-        '''
+            Network output as a 1D tensor.
+        """
+        # Stack inputs into [t, x] pairs for the linear layers.
         inp = torch.stack([t, x], dim=-1)
         out = self.net(inp)
         if debug:

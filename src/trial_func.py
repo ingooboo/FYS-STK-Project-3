@@ -1,8 +1,4 @@
-##########################################################################################################
-# TRIAL FUNCTION FOR THE ONE-DIMENSIONAL DIFFUSION EQUATION :
-##########################################################################################################
-# Project 3 - FYS-STK4155 :
-# Authors : Ingvild Olden and Jenny Guldvog 
+"""Trial functions for the 1D diffusion equation (autograd and PyTorch)."""
 
 ##########################################################################################################
 # IMPORT NECESSARY PACKAGES :
@@ -17,20 +13,15 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 ##########################################################################################################
 def u_t0_autograd(x, 
                   debug=False):
-    '''
-    Calculating the initial conditions for the trial funciton, using autograd.numpy implementation.
-    
-    Parameters:
-    --------
-    x :
-        The input of x, as a value in the list of discretized x-values.
-    debug : bool
-        If True, print debug information.
-    
+    """Compute initial condition at t=0 using autograd numpy.
+
+    Args:
+        x: Spatial coordinate(s).
+        debug: If True, print debug information.
+
     Returns:
-    --------
-        The calculated initial condition at t=0.
-    '''
+        Initial condition u(x, 0).
+    """
     u_t0 = np.sin(np.pi*x)
     if debug:
         print("Initial condition at t=0 (autograd): ")
@@ -40,20 +31,15 @@ def u_t0_autograd(x,
 
 def u_t0_pyTorch(x,
                  debug=False):
-    '''
-    Calculating the initial conditions for the trial funciton, using pyTorch tensors implementation.
-    
-    Parameters:
-    --------
-    x :
-        The input of x, as a value in the torch-list of discretized x-values.
-    debug : bool
-        If True, print debug information.
-    
-    Returns: 
-    --------
-        The calculated initial condition at t=0.
-    '''
+    """Compute initial condition at t=0 using PyTorch tensors.
+
+    Args:
+        x: Spatial coordinate tensor(s).
+        debug: If True, print debug information.
+
+    Returns:
+        Initial condition u(x, 0) as a tensor.
+    """
     u_t0 = torch.sin(torch.pi * x)
     if debug:
         print("Initial condition at t=0 (pyTorch): ")
@@ -70,30 +56,19 @@ def trial_function_autograd(x,
                             deep_params, 
                             activation_function, 
                             debug=False):
-    '''
-    Trial function for the one-dimensional diffusion equation, using autograd implementation.
-    
-    Parameters:
-    --------
-    x :
-        The input of x, as a value in the list of discretized x-values.
-    t : 
-        The input of t, as a value in the list of discretized t-values.
-    deep_neural_network : 
-        The neural network used in the trial function.
-    deep_params : 
-        List containing the weights and biases for each layer. 
-        Each element in the list is a 2D array where each row corresponds 
-        to the weights and bias for one neuron in that layer.
-    activation_function : 
-        The activation function used in the neural network
-    debug : bool
-        If True, print debug information.
-    
+    """Compute the trial function using autograd implementation.
+
+    Args:
+        x: Spatial coordinate(s).
+        t: Time coordinate(s).
+        deep_neural_network: Network function.
+        deep_params: List of weight matrices with bias rows.
+        activation_function: Activation function.
+        debug: If True, print debug information.
+
     Returns:
-    --------
-        The calculated trial function for given x and t
-    '''
+        Trial function value at (x, t).
+    """
     nn_in = np.array([x, t])
     nn_out = deep_neural_network(deep_params, nn_in, activation_function, debug) 
     B = x*(1-x)*t
@@ -109,34 +84,18 @@ def trial_function_autograd_C(x,
                               deep_params,
                               model,
                               debug=False):
-    '''
-    Trial function for the one-dimensional diffusion equation, using autograd implementation.
-    
-    Parameters:
-    --------
-    deep_params : 
-        List containing the weights and biases for each layer. 
-        Each element in the list is a 2D array where each row corresponds 
-        to the weights and bias for one neuron in that layer.
-    x :
-        The input of x, as a value in the list of discretized x-values.
-    t : 
-        The input of t, as a value in the list of discretized t-values.
-    deep_neural_network : 
-        The neural network used in the trial function.
-    deep_params : 
-        List containing the weights and biases for each layer. 
-        Each element in the list is a 2D array where each row corresponds 
-        to the weights and bias for one neuron in that layer.
-    activation_function : 
-        The activation function used in the neural network
-    debug : bool
-        If True, print debug information.
-    
+    """Compute the trial function using a model object with set_params.
+
+    Args:
+        x: Spatial coordinate(s).
+        t: Time coordinate(s).
+        deep_params: List of weight matrices with bias rows.
+        model: Model object that supports set_params and call.
+        debug: If True, print debug information.
+
     Returns:
-    --------
-        The calculated trial function for given x and t
-    '''
+        Trial function value at (x, t).
+    """
     nn_in = np.array([x, t])
     model.set_params(deep_params)
     N = model(nn_in, debug)
@@ -152,27 +111,17 @@ def trial_function_pyTorch(x,
                            t, 
                            model,
                            debug=False):
-    '''
-    Trial function for the one-dimensional diffusion equation, using pyTorch implementation.
-    
-    Parameters:
-    --------
-    x :
-        The input of x, as a value in the torch-list of discretized x-values.
-        Tensor that already have requires_grad=True and are on device. Do not clone().detach() here.
-    t : 
-        The input of t, as a value in the torch-list of discretized x-values.
-        Tensor that already have requires_grad=True and are on device. Do not clone().detach() here.
-    model : 
-        The neural network used in the trial function. 
-        Here pyTorch is implemented, and the activation function is chosen before this step.
-    debug : bool
-        If True, print debug information.
+    """Compute the trial function using PyTorch implementation.
+
+    Args:
+        x: Spatial tensor (requires_grad=True, on device).
+        t: Time tensor (requires_grad=True, on device).
+        model: PyTorch model (activation set at construction).
+        debug: If True, print debug information.
 
     Returns:
-    --------
-        The calculated trial function for given x and t
-    '''
+        Trial function value at (x, t) as a tensor.
+    """
     N = model(x, t, debug)
     #if N.dim() > 1:
     #    N = N.squeeze(-1)

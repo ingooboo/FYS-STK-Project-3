@@ -1,3 +1,5 @@
+"""Figure saving helper with consistent output paths."""
+
 from __future__ import annotations
 
 from itertools import count
@@ -10,14 +12,13 @@ _default_fig_ext = "pdf"
 
 
 def _default_outputs_dir() -> Path:
-    """
-    Return the repo-consistent outputs directory: code/main_clean/outputs.
+    """Return the repo-consistent outputs directory.
 
-    This is resolved from this file's location, so it does not depend on the
-    notebook/kernel working directory.
+    Returns:
+        Path to code/main_clean/outputs resolved from this file.
     """
     code_dir = Path(__file__).resolve().parents[1]  # .../code
-    return code_dir / "main_clean" / "outputs"
+    return code_dir / "main" / "outputs"
 
 
 def save_fig(
@@ -26,19 +27,13 @@ def save_fig(
     ext: Optional[str] = None,
     outputs_dir: Optional[Path] = None,
 ):
-    """
-    Save the current matplotlib figure (or provided fig) to code/main_clean/outputs.
+    """Save the current matplotlib figure (or provided fig).
 
-    Parameters
-    ----------
-    name:
-        Filename (with or without extension). If omitted, uses fig_1, fig_2, ...
-    fig:
-        Matplotlib figure object. If omitted, uses plt.gcf().
-    ext:
-        File extension to use if `name` has no suffix (default: pdf).
-    outputs_dir:
-        Override output directory (default: code/main_clean/outputs).
+    Args:
+        name: Filename with or without extension (defaults to fig_1, fig_2, ...).
+        fig: Matplotlib figure object (defaults to plt.gcf()).
+        ext: File extension when name has no suffix (default: pdf).
+        outputs_dir: Override output directory.
     """
     import matplotlib.pyplot as plt
 

@@ -1,8 +1,4 @@
-##########################################################################################################
-# COST FUNCTION FOR THE ONE-DIMENSIONAL DIFFUSION EQUATION :
-##########################################################################################################
-# Project 3 - FYS-STK4155 :
-# Authors : Ingvild Olden and Jenny Guldvog 
+"""Cost functions for the 1D diffusion equation PINN."""
 
 ##########################################################################################################
 # IMPORT NECESSARY PACKAGES :
@@ -22,30 +18,19 @@ def cost_function_autograd(deep_params,
                            deep_neural_network, 
                            activation_function,
                            debug=False):
-    '''
-    Cost function for the one-dimensional diffusion equation, using autograd implementation.
+    """Compute PDE residual cost using autograd and a function model.
 
-    Parameters:
-    --------
-    deep_params : 
-        List containing the weights and biases for each layer. 
-        Each element in the list is a 2D array where each row corresponds 
-        to the weights and bias for one neuron in that layer.
-    x :
-        The input of x, as a value in the list of discretized x-values.
-    t : 
-        The input of t, as a value in the list of discretized t-values.
-    deep_neural_network : 
-        The neural network used in the trial function.
-    activation_function : 
-        The activation function used in the neural network
-    debug : bool
-        If True, print debug information.
-    
+    Args:
+        deep_params: List of weight matrices with bias rows.
+        x: Spatial grid.
+        t: Time grid.
+        deep_neural_network: Network callable.
+        activation_function: Activation function.
+        debug: If True, print debug information.
+
     Returns:
-    --------
-        The calculated trial function for given x and t
-    '''
+        Average squared residual cost over the grid.
+    """
     # Initialize cost sum
     cost_sum = 0
     # Store results for debugging if needed
@@ -78,28 +63,18 @@ def cost_function_autograd_C(deep_params,
                              t,
                              model,
                              debug=False):
-    '''
-    Cost function for the one-dimensional diffusion equation, using autograd implementation.
+    """Compute PDE residual cost using autograd and a model object.
 
-    Parameters:
-    --------
-    deep_params : 
-        List containing the weights and biases for each layer. 
-        Each element in the list is a 2D array where each row corresponds 
-        to the weights and bias for one neuron in that layer.
-    x :
-        The input of x, as a value in the list of discretized x-values.
-    t : 
-        The input of t, as a value in the list of discretized t-values.
-    model : 
-        The neural network used in the trial function.
-    debug : bool
-        If True, print debug information.
-    
+    Args:
+        deep_params: List of weight matrices with bias rows.
+        x: Spatial grid.
+        t: Time grid.
+        model: Model object supporting set_params and call.
+        debug: If True, print debug information.
+
     Returns:
-    --------
-        The calculated trial function for given x and t
-    '''
+        Average squared residual cost over the grid.
+    """
     # Initialize cost sum
     cost_sum = 0
     # Store results for debugging if needed
@@ -131,24 +106,17 @@ def cost_function_pyTorch(x,
                           t, 
                           model,
                           debug=False):
-    '''  Cost function for the one-dimensional diffusion equation using PyTorch.
+    """Compute PDE residual cost using PyTorch autograd.
 
-    Parameters:
-    -----------
-    x : torch.tensor
-        Input data of shape (num_coordinates, ) for a single point or 
-        (num_coordinates, num_points) for multiple points.
-    t : torch.tensor
-        Input data of shape (num_coordinates, ) for a single point or 
-        (num_coordinates, num_points) for multiple points.
-    model : nn.Module
-        The neural network model defined using PyTorch.
-    debug : bool
-        If True, print debug information.
+    Args:
+        x: Spatial tensor (1D).
+        t: Time tensor (1D).
+        model: PyTorch model.
+        debug: If True, print debug information.
 
     Returns:
-    -----------
-    cost : torch.tensor'''
+        Scalar tensor with average squared residual cost.
+    """
     # Make sure x,t are tensors on device
     x = x.to(device)
     t = t.to(device)
@@ -201,10 +169,32 @@ def cost_function_pyTorch(x,
 # GRADIENT OF COST FUNCTION :
 ##########################################################################################################
 def gradient_cost_function(P, x, t, deep_neural_network, activation_function):
+    """Return gradient of the autograd cost function.
+
+    Args:
+        P: Model parameters.
+        x: Spatial grid.
+        t: Time grid.
+        deep_neural_network: Network callable.
+        activation_function: Activation function.
+
+    Returns:
+        Gradient of the cost with respect to parameters.
+    """
     cost_function_grad = grad(cost_function_autograd,0)
     return cost_function_grad((P, x, t, deep_neural_network, activation_function))
 
 def g_trial_batch_cost(model, x_batch, t_batch):
+    """Compute mean squared trial-function value for a batch.
+
+    Args:
+        model: PyTorch model.
+        x_batch: Spatial batch tensor.
+        t_batch: Time batch tensor.
+
+    Returns:
+        Mean squared value of trial function on the batch.
+    """
     # x_batch and t_batch are 1D tensors of same length (batch_size)
     R = trial_function_pyTorch(x_batch, t_batch, model)   # note order (t,x,model)
     return (R**2).mean()

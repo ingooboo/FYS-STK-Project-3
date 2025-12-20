@@ -1,8 +1,4 @@
-##########################################################################################################
-# NEURAL NETWORK IMPLEMENTATION :
-##########################################################################################################
-# Project 3 - FYS-STK4155 :
-# Authors : Ingvild Olden and Jenny Guldvog 
+"""Training utilities for the autograd-based PINN."""
 
 ##########################################################################################################
 # IMPORT NECESSARY PACKAGES :
@@ -26,29 +22,22 @@ def adam_update(params,
                 beta1=0.9, 
                 beta2=0.999, 
                 epsilon=1e-8):  
-    ''' 
-    Perform Adam optimization update on the parameters.
-    Parameters:
-    -----------
-    params : list of np.arrays
-        Current parameters of the model.
-    grads : list of np.arrays
-        Gradients of the parameters.
-    m : list of np.arrays
-        First moment estimates.
-    v : list of np.arrays
-        Second moment estimates.
-    t : int
-        Time step. This is used for bias correction.
-    learning_rate : float
-        Learning rate for the update.
-    beta1 : float
-        Exponential decay rate for the first moment estimates.
-    beta2 : float
-        Exponential decay rate for the second moment estimates.
-    epsilon : float
-        Small constant to prevent division by zero.
-    '''
+    """Perform Adam optimization update on parameter lists.
+
+    Args:
+        params: Current parameters.
+        grads: Gradients for each parameter.
+        m: First-moment estimates.
+        v: Second-moment estimates.
+        t: Time step for bias correction.
+        learning_rate: Step size.
+        beta1: Decay rate for first moment.
+        beta2: Decay rate for second moment.
+        epsilon: Small constant to avoid division by zero.
+
+    Returns:
+        Tuple of (updated_params, new_m, new_v).
+    """
     # Initialize lists to hold updated parameters and moment estimates
     updated_params = []
     new_m = []
@@ -81,6 +70,26 @@ def train_PINN_autograd(x,
                         replacement=False,
                         verbose=False,
                         debug=False):
+    """Train the autograd PINN with GD/Adam/SGD-Adam.
+
+    Args:
+        x: 1D spatial grid.
+        t: 1D time grid.
+        num_neurons: Hidden layer widths.
+        epochs: Number of training epochs.
+        learning_rate: Optimizer learning rate.
+        activation_function: Activation function name or callable.
+        seed: RNG seed.
+        optimization_method: 'GD', 'GD-adam', or 'SGD-adam'.
+        batch_size: Mini-batch size for SGD-Adam.
+        shuffle: If True, shuffle batches each epoch.
+        replacement: If True, sample batches with replacement.
+        verbose: If True, print training progress.
+        debug: If True, print debug information from model/cost.
+
+    Returns:
+        Tuple of (trained_params, history).
+    """
     # Set RNG seed for reproducible initialization
     npr.seed(seed)
     rng = npr.RandomState(seed)
@@ -134,7 +143,7 @@ def train_PINN_autograd(x,
             # --- end: add per-epoch history entry ---
     iter_count = 0
     #epoch = 0
-     # Helper: yield minibatch index arrays (no replacement) for one epoch
+    # Helper: yield minibatch index arrays (no replacement) for one epoch
     def epoch_minibatch_indices_no_replacement(order, batch_size):
         # ceil is used to ensure all samples are used
         # ceil(n_samples / batch_size) gives number of batches needed

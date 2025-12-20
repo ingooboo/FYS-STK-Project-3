@@ -1,6 +1,17 @@
+"""FTCS solver for the 1D diffusion equation."""
+
 import autograd.numpy as np
 
 def ftcs_solution(x, t):
+    """Compute FTCS solution on a grid and interpolate to target times.
+
+    Args:
+        x: 1D spatial grid.
+        t: 1D time grid.
+
+    Returns:
+        2D array of shape (len(x), len(t)) with solution values.
+    """
     # dx is created from x-array, and is uniform
     dx = float(x[1] - x[0])
     # number of spatial points
